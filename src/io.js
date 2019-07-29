@@ -19,6 +19,18 @@ export const statusOptions = {
     code: 204,
     shouldSerializeData: false,
   },
+  [Status.BAD_REQUEST]: {
+    code: 400,
+    shouldSerializeData: false,
+  },
+  [Status.UNAUTHORIZED]: {
+    code: 401,
+    shouldSerializeData: false,
+  },
+  [Status.FORBIDDEN]: {
+    code: 403,
+    shouldSerializeData: false,
+  },
   [Status.NOT_FOUND]: {
     code: 404,
     shouldSerializeData: false,
@@ -64,6 +76,50 @@ export default class IO {
    */
   static setEmpty(target) {
     IO.set(target, null, Status.NO_CONTENT);
+  }
+
+  /**
+   * Sets an empty response on the given express object (req/res).
+   * This method will clear any existing IO data, and set the status
+   * to BAD_REQUEST.
+   *
+   * @param target The express request or response.
+   */
+  static setBadRequest(target) {
+    IO.set(target, null, Status.BAD_REQUEST);
+  }
+
+  /**
+   * Sets an empty response on the given express object (req/res).
+   * This method will clear any existing IO data, and set the status
+   * to UNAUTHORIZED.
+   *
+   * @param target The express request or response.
+   */
+  static setUnauthorized(target) {
+    IO.set(target, null, Status.UNAUTHORIZED);
+  }
+
+  /**
+   * Sets an empty response on the given express object (req/res).
+   * This method will clear any existing IO data, and set the status
+   * to FORBIDDEN.
+   *
+   * @param target The express request or response.
+   */
+  static setForbidden(target) {
+    IO.set(target, null, Status.FORBIDDEN);
+  }
+
+  /**
+   * Sets an empty response on the given express object (req/res).
+   * This method will clear any existing IO data, and set the status
+   * to NOT_FOUND.
+   *
+   * @param target The express request or response.
+   */
+  static setNotFound(target) {
+    IO.set(target, null, Status.NOT_FOUND);
   }
 
   static prepareResponse(res) {
@@ -147,7 +203,6 @@ export default class IO {
     };
   }
 
-  // eslint-disable-next-line class-methods-use-this
   sendResponse() {
     return (req, res, next) => {
       try {

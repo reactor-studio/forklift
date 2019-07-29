@@ -16,6 +16,12 @@ describe('io static function', () => {
     expect(lodash.get(target, 'locals.io.status')).toBe('not-found');
   });
 
+  test('set sets default status to ok', () => {
+    const target = { test: true };
+    IO.set(target, {});
+    expect(lodash.get(target, 'locals.io.status')).toBe('ok');
+  });
+
   test('get returns the right value', () => {
     const target = {};
     lodash.set(target, 'locals.io.data', { data: true });
@@ -40,18 +46,44 @@ describe('io static function', () => {
     expect(lodash.get(target, 'locals.io.status')).toBe('created');
   });
 
-  test('setEmpty clears data', () => {
+  test('setEmpty clears data and sets status no-content', () => {
     const target = {};
     lodash.set(target, 'locals.io.data', { data: true });
     IO.setEmpty(target);
     expect(lodash.get(target, 'locals.io.data')).toBeNull();
+    expect(lodash.get(target, 'locals.io.status')).toBe('no-content');
   });
 
-  test('setEmpty sets status no-content', () => {
+  test('setBadRequest clears data & sets bad-request status', () => {
     const target = {};
     lodash.set(target, 'locals.io.data', { data: true });
-    IO.setEmpty(target);
-    expect(lodash.get(target, 'locals.io.status')).toBe('no-content');
+    IO.setBadRequest(target);
+    expect(lodash.get(target, 'locals.io.data')).toBeNull();
+    expect(lodash.get(target, 'locals.io.status')).toBe('bad-request');
+  });
+
+  test('setUnauthorized clears data & sets unauthorized status', () => {
+    const target = {};
+    lodash.set(target, 'locals.io.data', { data: true });
+    IO.setUnauthorized(target);
+    expect(lodash.get(target, 'locals.io.data')).toBeNull();
+    expect(lodash.get(target, 'locals.io.status')).toBe('unauthorized');
+  });
+
+  test('setForbidden clears data & sets forbidden status', () => {
+    const target = {};
+    lodash.set(target, 'locals.io.data', { data: true });
+    IO.setForbidden(target);
+    expect(lodash.get(target, 'locals.io.data')).toBeNull();
+    expect(lodash.get(target, 'locals.io.status')).toBe('forbidden');
+  });
+
+  test('setNotFound clears data & sets not-found status', () => {
+    const target = {};
+    lodash.set(target, 'locals.io.data', { data: true });
+    IO.setNotFound(target);
+    expect(lodash.get(target, 'locals.io.data')).toBeNull();
+    expect(lodash.get(target, 'locals.io.status')).toBe('not-found');
   });
 });
 
@@ -116,13 +148,7 @@ describe('io function', () => {
 
   test('validateResource throws on request not respecting schema', () => {
     req.setBody({ firstField: 'value', secondBADField: 'value' });
-    expect(() => io.validateResource(req)).toThrowErrorMatchingInlineSnapshot(`
-Object {
-  "how": "Missing required property: secondField",
-  "where": "request/body",
-  "why": "Body does not respect the schema",
-}
-`);
+    expect(() => io.validateResource(req)).toThrowErrorMatchingSnapshot();
   });
 
   test('validateResource does not throw on request respecting schema', () => {
