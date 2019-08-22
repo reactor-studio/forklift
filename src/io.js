@@ -37,9 +37,13 @@ export const statusOptions = {
   },
 };
 
-export default class IO {
-  static set(target, data, status = Status.OK) {
-    _.set(target, 'locals.io.data', data);
+export class IO {
+  static set(target, data, status = Status.OK, path = null) {
+    if (path) {
+      _.set(target, `locals.io.data.${path}`, data);
+    } else {
+      _.set(target, 'locals.io.data', data);
+    }
     _.set(target, 'locals.io.status', status);
   }
 

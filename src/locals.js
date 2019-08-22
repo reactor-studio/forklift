@@ -21,8 +21,7 @@ export function getLocals(obj, namespace, defaultValue = undefined) {
  */
 export function setLocals(obj, namespace, data) {
   if (!obj.locals) {
-    // eslint-disable-next-line no-param-reassign
-    obj.locals = {};
+    _.set(obj, 'locals', {});
   }
   if (data === undefined) return _.unset(obj, `locals.${namespace}`);
   if (_.isObject(_.get(obj, `locals.${namespace}`))) {

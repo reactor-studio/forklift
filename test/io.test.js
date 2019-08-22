@@ -97,7 +97,7 @@ describe('io function', () => {
     properties: {
       firstField: {
         type: 'string',
-        description: "The object' first field.",
+        description: "The object's first field.",
       },
       secondField: {
         type: 'string',
