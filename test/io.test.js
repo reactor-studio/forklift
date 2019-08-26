@@ -1,4 +1,4 @@
-import lodash from 'lodash';
+import _ from 'lodash';
 import { Response } from 'jest-express/lib/response';
 import { Request } from 'jest-express/lib/request';
 import { IO, Status } from '../src';
@@ -7,83 +7,83 @@ describe('io static function', () => {
   test('set sets provided data', () => {
     const target = { test: true };
     IO.set(target, { another: false });
-    expect(lodash.get(target, 'locals.io.data')).toEqual({ another: false });
+    expect(_.get(target, 'locals.io.data')).toEqual({ another: false });
   });
 
   test('set sets provided status', () => {
     const target = { test: true };
     IO.set(target, {}, Status.NOT_FOUND);
-    expect(lodash.get(target, 'locals.io.status')).toBe('not-found');
+    expect(_.get(target, 'locals.io.status')).toBe('not-found');
   });
 
   test('set sets default status to ok', () => {
     const target = { test: true };
     IO.set(target, {});
-    expect(lodash.get(target, 'locals.io.status')).toBe('ok');
+    expect(_.get(target, 'locals.io.status')).toBe('ok');
   });
 
   test('get returns the right value', () => {
     const target = {};
-    lodash.set(target, 'locals.io.data', { data: true });
+    _.set(target, 'locals.io.data', { data: true });
     expect(IO.get(target)).toEqual({ data: true });
   });
 
   test('get with local key returns data within local key', () => {
     const target = {};
-    lodash.set(target, 'locals.io.data.some.key', { data: true });
+    _.set(target, 'locals.io.data.some.key', { data: true });
     expect(IO.get(target, 'some.key')).toEqual({ data: true });
   });
 
   test('getStatus returns status', () => {
     const target = {};
-    lodash.set(target, 'locals.io.status', 'ok');
+    _.set(target, 'locals.io.status', 'ok');
     expect(IO.getStatus(target)).toBe('ok');
   });
 
   test('setCreated sets status created', () => {
     const target = {};
     IO.setCreated(target, 'data');
-    expect(lodash.get(target, 'locals.io.status')).toBe('created');
+    expect(_.get(target, 'locals.io.status')).toBe('created');
   });
 
   test('setEmpty clears data and sets status no-content', () => {
     const target = {};
-    lodash.set(target, 'locals.io.data', { data: true });
+    _.set(target, 'locals.io.data', { data: true });
     IO.setEmpty(target);
-    expect(lodash.get(target, 'locals.io.data')).toBeNull();
-    expect(lodash.get(target, 'locals.io.status')).toBe('no-content');
+    expect(_.get(target, 'locals.io.data')).toBeNull();
+    expect(_.get(target, 'locals.io.status')).toBe('no-content');
   });
 
   test('setBadRequest clears data & sets bad-request status', () => {
     const target = {};
-    lodash.set(target, 'locals.io.data', { data: true });
+    _.set(target, 'locals.io.data', { data: true });
     IO.setBadRequest(target);
-    expect(lodash.get(target, 'locals.io.data')).toBeNull();
-    expect(lodash.get(target, 'locals.io.status')).toBe('bad-request');
+    expect(_.get(target, 'locals.io.data')).toBeNull();
+    expect(_.get(target, 'locals.io.status')).toBe('bad-request');
   });
 
   test('setUnauthorized clears data & sets unauthorized status', () => {
     const target = {};
-    lodash.set(target, 'locals.io.data', { data: true });
+    _.set(target, 'locals.io.data', { data: true });
     IO.setUnauthorized(target);
-    expect(lodash.get(target, 'locals.io.data')).toBeNull();
-    expect(lodash.get(target, 'locals.io.status')).toBe('unauthorized');
+    expect(_.get(target, 'locals.io.data')).toBeNull();
+    expect(_.get(target, 'locals.io.status')).toBe('unauthorized');
   });
 
   test('setForbidden clears data & sets forbidden status', () => {
     const target = {};
-    lodash.set(target, 'locals.io.data', { data: true });
+    _.set(target, 'locals.io.data', { data: true });
     IO.setForbidden(target);
-    expect(lodash.get(target, 'locals.io.data')).toBeNull();
-    expect(lodash.get(target, 'locals.io.status')).toBe('forbidden');
+    expect(_.get(target, 'locals.io.data')).toBeNull();
+    expect(_.get(target, 'locals.io.status')).toBe('forbidden');
   });
 
   test('setNotFound clears data & sets not-found status', () => {
     const target = {};
-    lodash.set(target, 'locals.io.data', { data: true });
+    _.set(target, 'locals.io.data', { data: true });
     IO.setNotFound(target);
-    expect(lodash.get(target, 'locals.io.data')).toBeNull();
-    expect(lodash.get(target, 'locals.io.status')).toBe('not-found');
+    expect(_.get(target, 'locals.io.data')).toBeNull();
+    expect(_.get(target, 'locals.io.status')).toBe('not-found');
   });
 });
 
@@ -119,7 +119,7 @@ describe('io function', () => {
   });
 
   test('prepareResponse sets correct status code', () => {
-    lodash.set(res, 'locals.io.status', 'ok');
+    _.set(res, 'locals.io.status', 'ok');
     IO.prepareResponse(res);
     expect(res.status).toHaveBeenCalledWith(200);
   });
