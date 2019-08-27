@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Response } from 'jest-express/lib/response';
 import { Request } from 'jest-express/lib/request';
-import { IO, Status } from '../src';
+import { IO, Status, ioErrorAdapter } from '../src';
 
 describe('io static function', () => {
   test('set sets provided data', () => {
@@ -92,25 +92,41 @@ describe('io function', () => {
   let req;
   let res;
 
-  const simpleSchema = {
+  const reqSchema = {
     type: 'object',
     properties: {
-      firstField: {
+      firstProperty: {
         type: 'string',
-        description: "The object's first field.",
+        description: "The response's first property.",
       },
-      secondField: {
-        type: 'string',
-        description: "The object's second field.",
+      objectProperty: {
+        type: 'object',
+        properties: {
+          nestedProperty: {
+            type: 'string',
+          },
+        },
+        required: ['nestedProperty'],
       },
     },
-    required: ['firstField', 'secondField'],
+    required: ['firstProperty', 'objectProperty'],
+  };
+
+  const resSchema = {
+    type: 'object',
+    properties: {
+      firstProperty: {
+        type: 'string',
+        description: "The response's first property.",
+      },
+    },
+    required: ['firstProperty'],
   };
 
   beforeEach(() => {
     req = new Request();
     res = new Response();
-    io = new IO(simpleSchema, { options: 1 });
+    io = new IO(reqSchema, { options: 1 }, resSchema);
   });
 
   afterEach(() => {
@@ -129,12 +145,25 @@ describe('io function', () => {
     expect(res.getHeader('Content-Type')).toEqual('application/json');
   });
 
-  test('constructor sets correct schema', () => {
-    expect(io.schema).toEqual(simpleSchema);
+  test('constructor sets correct request schema', () => {
+    expect(io.reqSchema).toEqual(reqSchema);
   });
 
   test('constructor sets correct options', () => {
     expect(io.options).toEqual({ options: 1 });
+  });
+
+  test('validateResource returns error details on request not respecting schema', () => {
+    req.setBody({ firstProperty: 'abc', objectProperty: {} });
+    expect(IO.validateResource(req.body, reqSchema)).toMatchSnapshot();
+  });
+
+  test('validateResource returns null on request respecting schema', () => {
+    req.setBody({
+      firstProperty: 'abc',
+      objectProperty: { nestedProperty: 'bcd' },
+    });
+    expect(IO.validateResource(req.body, reqSchema)).toBeNull();
   });
 
   test('validateRequestHeaders throws on empty accept header', () => {
@@ -146,14 +175,16 @@ describe('io function', () => {
     );
   });
 
-  test('validateResource throws on request not respecting schema', () => {
-    req.setBody({ firstField: 'value', secondBADField: 'value' });
-    expect(() => io.validateResource(req)).toThrowErrorMatchingSnapshot();
-  });
-
-  test('validateResource does not throw on request respecting schema', () => {
-    req.setBody({ firstField: 'value', secondField: 'value' });
-    expect(() => io.validateResource(req)).not.toThrow();
+  test('validateRequest throws on invalid body', () => {
+    const next = err => {
+      throw err;
+    };
+    req.setHeaders('Accept', 'application/json');
+    req.setHeaders('content-type', 'application/json');
+    req.setBody({ firstProperty: 'abc', objectProperty: {} });
+    expect(() =>
+      io.processRequest()(req, res, next),
+    ).toThrowErrorMatchingSnapshot();
   });
 
   test('processRequest throws on wrong content-type', () => {
@@ -185,8 +216,15 @@ describe('io function', () => {
   });
 
   test('sendResponse sends json response', () => {
-    IO.set(res, { test: 'test!' });
+    IO.set(res, { firstProperty: 'test!' });
     io.sendResponse()(req, res, null);
     expect(res.json).toHaveBeenCalled();
+  });
+
+  test('sendResponse forwards the io error', () => {
+    IO.set(res, { BADProperty: 'test!' });
+    expect(
+      ioErrorAdapter.toJson(io.sendResponse()(req, res, err => err)),
+    ).toMatchSnapshot();
   });
 });
