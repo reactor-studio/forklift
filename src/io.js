@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import tv4 from 'tv4';
 import { Status } from './status';
-import { IoError } from './io-error';
+import { IoError, IoResError } from './io-error';
 
 const jsonContentType = 'application/json';
 const supportedContentTypes = [jsonContentType, '*/*', '*'];
@@ -138,8 +138,29 @@ export class IO {
     res.set('Content-Type', jsonContentType);
   }
 
-  constructor(schema, options) {
-    this.schema = schema;
+  static validateResource(resource, schema) {
+    const isBodyRespectingSchema = () => tv4.validateResult(resource, schema);
+    const errorObject = isBodyRespectingSchema();
+    if (errorObject.error) {
+      const message = _.get(errorObject, 'error.subErrors')
+        ? `It can be any of these errors [${_.map(
+            errorObject.error.subErrors,
+            subError => subError.message,
+          )}]`
+        : errorObject.error.message;
+      const errorDetails = {
+        why: 'Resource does not respect the schema',
+        where: `${errorObject.error.dataPath}`,
+        how: message,
+      };
+      return errorDetails;
+    }
+    return null;
+  }
+
+  constructor(reqSchema, options, resSchema) {
+    this.reqSchema = reqSchema;
+    this.resSchema = resSchema;
     this.options = options;
   }
 
@@ -174,29 +195,23 @@ export class IO {
     }
   }
 
-  validateResource(req) {
-    const isBodyRespectingSchema = () =>
-      tv4.validateResult(req.body, this.schema);
-    const errorObject = isBodyRespectingSchema();
-    if (errorObject.error) {
-      const message = _.get(errorObject, 'error.subErrors')
-        ? `It can be any of these errors [${_.map(
-            errorObject.error.subErrors,
-            subError => subError.message,
-          )}]`
-        : errorObject.error.message;
-      const errorDetails = {
-        why: 'Body does not respect the schema',
-        where: `request/body${errorObject.error.dataPath}`,
-        how: message,
-      };
-      throw new IoError(errorDetails);
+  validateRequest(req) {
+    this.validateRequestHeaders(req);
+    if (this.reqSchema) {
+      const errorDetails = IO.validateResource(req.body, this.reqSchema);
+      if (errorDetails) {
+        throw new IoError(errorDetails);
+      }
     }
   }
 
-  validateRequest(req) {
-    this.validateRequestHeaders(req);
-    this.validateResource(req);
+  validateResponse(data) {
+    if (this.resSchema) {
+      const errorDetails = IO.validateResource(data, this.resSchema);
+      if (errorDetails) {
+        throw new IoResError(errorDetails);
+      }
+    }
   }
 
   processRequest() {
@@ -217,9 +232,9 @@ export class IO {
         }
         const data = IO.get(res);
         if (_.isEmpty(data)) {
-          return next(new IoError('No data to serialize'));
+          return next(new IoResError('No data to serialize'));
         }
-
+        this.validateResponse(data);
         res.json(data);
         return null;
       } catch (error) {
