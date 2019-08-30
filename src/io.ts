@@ -1,53 +1,28 @@
 import _ from 'lodash';
 import tv4 from 'tv4';
-import { Status } from './status';
-import { IoError, IoResError } from './io-error';
+import { Request, Response, NextFunction } from 'express';
+import { IoReqError, IoResError, ErrorDetails } from './io-error';
+import { Status, statusOptions } from './status';
 
 const jsonContentType = 'application/json';
 const supportedContentTypes = [jsonContentType, '*/*', '*'];
 
-export const statusOptions = {
-  [Status.OK]: {
-    code: 200,
-    shouldSerializeData: true,
-  },
-  [Status.CREATED]: {
-    code: 201,
-    shouldSerializeData: true,
-  },
-  [Status.NO_CONTENT]: {
-    code: 204,
-    shouldSerializeData: false,
-  },
-  [Status.BAD_REQUEST]: {
-    code: 400,
-    shouldSerializeData: false,
-  },
-  [Status.UNAUTHORIZED]: {
-    code: 401,
-    shouldSerializeData: false,
-  },
-  [Status.FORBIDDEN]: {
-    code: 403,
-    shouldSerializeData: false,
-  },
-  [Status.NOT_FOUND]: {
-    code: 404,
-    shouldSerializeData: false,
-  },
-};
-
 export class IO {
-  static set(target, data, status = Status.OK, path = null) {
+  static set(
+    target: object,
+    data: any,
+    status: Status = Status.OK,
+    path: string = null,
+  ): object {
     if (path) {
       _.set(target, `locals.io.data.${path}`, data);
     } else {
       _.set(target, 'locals.io.data', data);
     }
-    _.set(target, 'locals.io.status', status);
+    return _.set(target, 'locals.io.status', status);
   }
 
-  static get(target, localsKey = '') {
+  static get(target: object, localsKey = ''): any {
     const data = _.get(target, 'locals.io.data');
     if (localsKey) {
       return _.get(data, localsKey);
@@ -56,7 +31,7 @@ export class IO {
     return data;
   }
 
-  static getStatus(target) {
+  static getStatus(target: object): any {
     return _.get(target, 'locals.io.status');
   }
 
@@ -67,8 +42,8 @@ export class IO {
    * @param target The express request or response.
    * @param data The IO data to set.
    */
-  static setCreated(target, data) {
-    IO.set(target, data, Status.CREATED);
+  static setCreated(target: object, data: any): object {
+    return IO.set(target, data, Status.CREATED);
   }
 
   /**
@@ -78,8 +53,8 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setEmpty(target) {
-    IO.set(target, null, Status.NO_CONTENT);
+  static setEmpty(target: object): object {
+    return IO.set(target, null, Status.NO_CONTENT);
   }
 
   /**
@@ -89,8 +64,8 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setBadRequest(target) {
-    IO.set(target, null, Status.BAD_REQUEST);
+  static setBadRequest(target: object): object {
+    return IO.set(target, null, Status.BAD_REQUEST);
   }
 
   /**
@@ -100,8 +75,8 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setUnauthorized(target) {
-    IO.set(target, null, Status.UNAUTHORIZED);
+  static setUnauthorized(target: object): object {
+    return IO.set(target, null, Status.UNAUTHORIZED);
   }
 
   /**
@@ -111,8 +86,8 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setForbidden(target) {
-    IO.set(target, null, Status.FORBIDDEN);
+  static setForbidden(target: object): object {
+    return IO.set(target, null, Status.FORBIDDEN);
   }
 
   /**
@@ -122,11 +97,11 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setNotFound(target) {
-    IO.set(target, null, Status.NOT_FOUND);
+  static setNotFound(target: object): object {
+    return IO.set(target, null, Status.NOT_FOUND);
   }
 
-  static prepareResponse(res) {
+  static prepareResponse(res: Response): boolean {
     const ioStatus = IO.getStatus(res) || Status.NO_CONTENT;
     const status = statusOptions[ioStatus];
     res.status(status.code);
@@ -134,12 +109,13 @@ export class IO {
     return status.shouldSerializeData;
   }
 
-  static setResponseHeaders(res) {
-    res.set('Content-Type', jsonContentType);
+  static setResponseHeaders(res: Response): Response {
+    return res.set('Content-Type', jsonContentType);
   }
 
-  static validateResource(resource, schema) {
-    const isBodyRespectingSchema = () => tv4.validateResult(resource, schema);
+  static validateResource(resource: any, schema: tv4.JsonSchema): ErrorDetails {
+    const isBodyRespectingSchema = (): tv4.SingleResult =>
+      tv4.validateResult(resource, schema);
     const errorObject = isBodyRespectingSchema();
     if (errorObject.error) {
       const message = _.get(errorObject, 'error.subErrors')
@@ -158,16 +134,26 @@ export class IO {
     return null;
   }
 
-  constructor(reqSchema, options, resSchema) {
+  private reqSchema: tv4.JsonSchema;
+
+  private resSchema: tv4.JsonSchema;
+
+  private options: object;
+
+  constructor(
+    reqSchema: tv4.JsonSchema,
+    options: object,
+    resSchema: tv4.JsonSchema,
+  ) {
     this.reqSchema = reqSchema;
     this.resSchema = resSchema;
     this.options = options;
   }
 
-  validateRequestHeaders(req) {
+  private validateRequestHeaders(req: Request): void {
     if (req.headers['content-type'].indexOf('application/json') < 0) {
       const message = 'Please use application-json as Content-Type';
-      throw new IoError(message);
+      throw new IoReqError(message);
     }
 
     const acceptHeader = req.get('Accept') || '';
@@ -191,31 +177,31 @@ export class IO {
         'Did you set the correct "Accept" header?'}${JSON.stringify(
         contentTypes,
       )}`;
-      throw new IoError(message);
+      throw new IoReqError(message);
     }
   }
 
-  validateRequest(req) {
+  private validateRequest(req: Request): void {
     this.validateRequestHeaders(req);
     if (this.reqSchema) {
       const errorDetails = IO.validateResource(req.body, this.reqSchema);
       if (errorDetails) {
-        throw new IoError(errorDetails);
+        throw new IoReqError(errorDetails.why, errorDetails);
       }
     }
   }
 
-  validateResponse(data) {
+  private validateResponse(data: object): void {
     if (this.resSchema) {
       const errorDetails = IO.validateResource(data, this.resSchema);
       if (errorDetails) {
-        throw new IoResError(errorDetails);
+        throw new IoResError(errorDetails.why, errorDetails);
       }
     }
   }
 
   processRequest() {
-    return (req, res, next) => {
+    return (req: Request, _res: Response, next: NextFunction): void => {
       this.validateRequest(req);
       IO.set(req, req.body);
       next();
@@ -223,7 +209,7 @@ export class IO {
   }
 
   sendResponse() {
-    return (req, res, next) => {
+    return (_req: Request, res: Response, next: NextFunction): void => {
       try {
         const shouldSerializeData = IO.prepareResponse(res);
         if (!shouldSerializeData) {

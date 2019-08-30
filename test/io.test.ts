@@ -176,7 +176,7 @@ describe('io function', () => {
   });
 
   test('validateRequest throws on invalid body', () => {
-    const next = err => {
+    const next = (err: Error): void => {
       throw err;
     };
     req.setHeaders('Accept', 'application/json');
@@ -188,7 +188,7 @@ describe('io function', () => {
   });
 
   test('processRequest throws on wrong content-type', () => {
-    const next = err => {
+    const next = (err: Error): void => {
       throw err;
     };
     req.setHeaders('content-type', 'text/plain');
@@ -200,13 +200,13 @@ describe('io function', () => {
   });
 
   test('sendResponse ends response on non-serializable data', () => {
-    IO.set(res, {}, null, Status.NOT_FOUND);
+    IO.set(res, {}, Status.NOT_FOUND);
     io.sendResponse()(req, res, null);
     expect(res.end).toHaveBeenCalled();
   });
 
   test('sendResponse throws on empty data to be serialized', () => {
-    const next = err => {
+    const next = (err: Error): void => {
       throw err;
     };
     IO.set(res, null, Status.OK);

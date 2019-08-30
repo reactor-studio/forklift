@@ -1,8 +1,8 @@
-import * as _ from 'lodash';
-import { getLocals, setLocals } from '../src/locals';
+import _ from 'lodash';
+import { getLocals, setLocals } from '../src';
 
 describe('locals function', () => {
-  let target;
+  let target: object;
 
   beforeEach(() => {
     target = {};
