@@ -8,20 +8,14 @@ Object {
     "why": "Resource does not respect the schema",
   },
   "meta": Object {
-    "trace": [IoResError: [object Object]],
+    "trace": [IoResError: Resource does not respect the schema],
   },
   "status": 500,
   "title": "Response data is invalid",
 }
 `;
 
-exports[`io function validateRequest throws on invalid body 1`] = `
-Object {
-  "how": "Missing required property: nestedProperty",
-  "where": "/objectProperty",
-  "why": "Resource does not respect the schema",
-}
-`;
+exports[`io function validateRequest throws on invalid body 1`] = `"Resource does not respect the schema"`;
 
 exports[`io function validateResource returns error details on request not respecting schema 1`] = `
 Object {

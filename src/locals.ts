@@ -8,7 +8,11 @@ import _ from 'lodash';
 /*
  * Read data stored inside particular `namespace` of `obj.locals`.
  */
-export function getLocals(obj, namespace, defaultValue = undefined) {
+export function getLocals(
+  obj: object,
+  namespace: string,
+  defaultValue: object = undefined,
+): object {
   return _.get(obj, `locals.${namespace}`, defaultValue);
 }
 
@@ -19,11 +23,18 @@ export function getLocals(obj, namespace, defaultValue = undefined) {
  * `namespace` groups all data belonging to one middleware - for example,
  * authentication middleware might save user id to `req.locals.auth.userId`.
  */
-export function setLocals(obj, namespace, data) {
-  if (!obj.locals) {
+export function setLocals(
+  obj: object,
+  namespace: string,
+  data: object,
+): object {
+  if (!_.has(obj, 'locals')) {
     _.set(obj, 'locals', {});
   }
-  if (data === undefined) return _.unset(obj, `locals.${namespace}`);
+  if (data === undefined) {
+    _.unset(obj, `locals.${namespace}`);
+    return obj;
+  }
   if (_.isObject(_.get(obj, `locals.${namespace}`))) {
     const namespaceData = {};
     _.set(namespaceData, `locals.${namespace}`, data);
