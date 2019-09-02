@@ -141,9 +141,9 @@ export class IO {
   private options: object;
 
   constructor(
-    reqSchema: tv4.JsonSchema,
-    options: object,
-    resSchema: tv4.JsonSchema,
+    reqSchema?: tv4.JsonSchema,
+    options?: object,
+    resSchema?: tv4.JsonSchema,
   ) {
     this.reqSchema = reqSchema;
     this.resSchema = resSchema;
