@@ -6,7 +6,7 @@
     "noUnusedParameters": false,
     "allowSyntheticDefaultImports": true,
     "sourceMap": true,
-    "target": "es2018",
+    "target": "es5",
     "outDir": "lib",
     "baseUrl": "./src",
     "esModuleInterop": true,
