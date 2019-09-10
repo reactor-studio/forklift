@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Response } from 'jest-express/lib/response';
 import { Request } from 'jest-express/lib/request';
-import { IO, Status, ioErrorAdapter } from '../src';
+import IO, { Status, ioErrorAdapter } from '../src';
 
 describe('io static function', () => {
   test('set sets provided data', () => {
