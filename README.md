@@ -1,4 +1,5 @@
-# Forklift
+# Forklift 
+[![Build Status](https://travis-ci.org/reactor-studio/forklift.svg?branch=master)](https://travis-ci.org/reactor-studio/forklift)
 
 Forklift is a TypeScript library written to simplify request-response flow in Express.js applications. It is meant to be used as a pre & post core logic middleware. 
 
