@@ -1,7 +1,8 @@
 import _ from 'lodash';
 import tv4 from 'tv4';
 import { Request, Response, NextFunction } from 'express';
-import { IoReqError, IoResError, ErrorDetails } from './io-error';
+import { InputError, OutputError } from '../errors';
+import { ErrorDetails } from '../errors/io-error';
 import { Status, statusOptions } from './status';
 
 const jsonContentType = 'application/json';
@@ -153,7 +154,7 @@ export class IO {
   private validateRequestHeaders(req: Request): void {
     if (req.headers['content-type'].indexOf('application/json') < 0) {
       const message = 'Please use application-json as Content-Type';
-      throw new IoReqError(message);
+      throw new InputError(message);
     }
 
     const acceptHeader = req.get('Accept') || '';
@@ -177,7 +178,7 @@ export class IO {
         'Did you set the correct "Accept" header?'}${JSON.stringify(
         contentTypes,
       )}`;
-      throw new IoReqError(message);
+      throw new InputError(message);
     }
   }
 
@@ -186,7 +187,7 @@ export class IO {
     if (this.reqSchema) {
       const errorDetails = IO.validateResource(req.body, this.reqSchema);
       if (errorDetails) {
-        throw new IoReqError(errorDetails.why, errorDetails);
+        throw new InputError(errorDetails.why, errorDetails);
       }
     }
   }
@@ -195,7 +196,7 @@ export class IO {
     if (this.resSchema) {
       const errorDetails = IO.validateResource(data, this.resSchema);
       if (errorDetails) {
-        throw new IoResError(errorDetails.why, errorDetails);
+        throw new OutputError(errorDetails.why, errorDetails);
       }
     }
   }
@@ -218,7 +219,7 @@ export class IO {
         }
         const data = IO.get(res);
         if (_.isEmpty(data)) {
-          return next(new IoResError('No data to serialize'));
+          return next(new OutputError('No data to serialize'));
         }
         this.validateResponse(data);
         res.json(data);
