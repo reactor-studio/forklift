@@ -2,16 +2,15 @@
 
 exports[`io function sendResponse forwards the io error 1`] = `
 Object {
-  "detail": Object {
+  "details": Object {
     "how": "Missing required property: firstProperty",
     "where": "",
     "why": "Resource does not respect the schema",
   },
-  "meta": Object {
-    "trace": [IoResError: Resource does not respect the schema],
-  },
+  "message": "Resource does not respect the schema",
+  "meta": null,
   "status": 500,
-  "title": "Response data is invalid",
+  "title": "OutputError",
 }
 `;
 

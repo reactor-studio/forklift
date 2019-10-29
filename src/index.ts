@@ -1,6 +1,18 @@
-export { IoReqError, IoResError, ioErrorAdapter } from './io-error';
-export { Status, statusOptions } from './status';
-export { setLocals, getLocals } from './locals';
-import { IO } from './io';
+export {
+  default as IO,
+  Status,
+  statusOptions,
+  setLocals,
+  getLocals,
+} from './io';
 
-export default IO;
+export { asyncMiddleware, errorMiddleware } from './middleware';
+
+export {
+  NotFoundError,
+  ForbiddenError,
+  InputError,
+  OutputError,
+  ConflictError,
+  ForkliftError,
+} from './errors';

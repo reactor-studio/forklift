@@ -1,7 +1,7 @@
 import _ from 'lodash';
 import { Response } from 'jest-express/lib/response';
 import { Request } from 'jest-express/lib/request';
-import IO, { Status, ioErrorAdapter } from '../src';
+import { IO, Status } from '../../src';
 
 describe('io static function', () => {
   test('set sets provided data', () => {
@@ -224,7 +224,9 @@ describe('io function', () => {
   test('sendResponse forwards the io error', () => {
     IO.set(res, { BADProperty: 'test!' });
     expect(
-      ioErrorAdapter.toJson(io.sendResponse()(req, res, err => err)),
+      io
+        .sendResponse()(req, res, (err: Error) => err)
+        .toJson(),
     ).toMatchSnapshot();
   });
 });

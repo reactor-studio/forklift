@@ -4,6 +4,6 @@ module.exports = {
     "^.+\\.ts$": "ts-jest",
   },
   testPathIgnorePatterns: ["/node_modules/"],
-  testRegex: "(/test/.*|(\\.|/)test)\\.ts$",
+  testRegex: "/test/.*\\.test\\.ts$",
   moduleFileExtensions: ["ts", "js"],
 };
