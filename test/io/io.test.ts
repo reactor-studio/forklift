@@ -175,6 +175,15 @@ describe('io function', () => {
     );
   });
 
+  test('processRequest doesnt throw on undefined schema', () => {
+    const ioTest = new IO();
+
+    req.setHeaders('Accept', 'application/json');
+    req.setHeaders('content-type', 'application/json');
+
+    expect(() => ioTest.processRequest()(req, res, err => err)).not.toThrow();
+  });
+
   test('validateRequest throws on invalid body', () => {
     const next = (err: Error): void => {
       throw err;
