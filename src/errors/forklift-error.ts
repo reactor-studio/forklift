@@ -5,6 +5,14 @@ export default class ForkliftError extends Error {
 
   readonly stack: string;
 
+  /**
+   * Custom error type which one should extend in order to support custom error types,
+   * which include custom names and response statuses. The extended error is expected
+   * to provide the params in the constructor.
+   * @param message 
+   * @param status 
+   * @param name 
+   */
   constructor(message: string, status: number, name: string) {
     super(message);
     this.message = message;

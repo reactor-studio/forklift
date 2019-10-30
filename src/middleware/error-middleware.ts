@@ -2,6 +2,14 @@ import { Request, Response, NextFunction } from 'express';
 import errorToJson from 'error-to-json';
 import ForkliftError from '../errors/forklift-error';
 
+/**
+ * Error handler middleware with special handling for `ForkliftError` error type.
+ * If the received `error` is extended from the `ForkliftError` parent class it will
+ * call its `toJson` method and send the response with the result, using status from the
+ * `error` object. Otherwise, status is by default 500 and basic error data is copied
+ * to the JSON response.
+ * @param showTrace flag indicating whether to include stack trace inside the error object
+ */
 export const errorMiddleware = (showTrace = true) => (
   err: ForkliftError | Error,
   _req: Request,
