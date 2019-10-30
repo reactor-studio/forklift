@@ -5,7 +5,7 @@
 */
 import _ from 'lodash';
 
-/*
+/**
  * Read data stored inside particular `namespace` of `obj.locals`.
  */
 export function getLocals(
@@ -16,12 +16,12 @@ export function getLocals(
   return _.get(obj, `locals.${namespace}`, defaultValue);
 }
 
-/*
- * Store `data` inside `obj.locals[namespace]`.
+/**
+ *  Store `data` inside `obj.locals[namespace]`.
  *
  * `obj` can be any object, but is usually either request or response.
  * `namespace` groups all data belonging to one middleware - for example,
- * authentication middleware might save user id to `req.locals.auth.userId`.
+ *  authentication middleware might save user id to `req.locals.auth.userId`.
  */
 export function setLocals(
   obj: object,
