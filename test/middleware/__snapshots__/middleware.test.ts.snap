@@ -8,3 +8,9 @@ Object {
   "title": "Not Found",
 }
 `;
+
+exports[`Forklift error middleware should handle unhandled exceptions in handlers with asyncMiddleware 1`] = `
+Object {
+  "name": "Error",
+}
+`;
