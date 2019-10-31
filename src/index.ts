@@ -1,18 +1,13 @@
-export {
-  default as IO,
-  Status,
-  statusOptions,
-  setLocals,
-  getLocals,
-} from './io';
+export { default as IO, Status, setLocals, getLocals } from './io';
 
 export { asyncMiddleware, errorMiddleware } from './middleware';
 
 export {
+  BadRequestError,
   NotFoundError,
   ForbiddenError,
+  ConflictError,
   InputError,
   OutputError,
-  ConflictError,
   ForkliftError,
 } from './errors';
