@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Forklift error module should provide easy extension of ForkliftError 1`] = `
+Object {
+  "message": "Some test message",
+  "meta": null,
+  "status": 999,
+  "title": "Custom error",
+}
+`;
