@@ -125,10 +125,10 @@ Let's start with the more straight forward one, `errorMiddleware`. This is simpl
 // e.g.
 app.use(someRouter);
 app.use(someOtherRouter);
-app.use(errorMiddleware);
+app.use(errorMiddleware());
 ```
 
-Expected behavior of this middleware is to handle special type of errors which extend `ForkliftError` class. It is designed to provide a possibilty to add custom errors without much hassle.
+Expected behavior of this middleware is to handle special type of errors which extend `ForkliftError` class. It is designed to provide a possibilty to add custom errors without much hassle. Every error that is a subclass of `ForkliftError` has `toJson` method available which will provide a pretty formatted object of error details.
 
 ```javascript
 import ForkliftError from '@reactor4/forklift';
