@@ -1,4 +1,4 @@
-export { default as IO, Status, setLocals, getLocals } from './io';
+export { IO, Status, setLocals, getLocals } from './io';
 
 export { asyncMiddleware, errorMiddleware } from './middleware';
 
