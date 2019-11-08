@@ -226,7 +226,7 @@ describe('io function', () => {
 
   test('sendResponse sends json response', () => {
     IO.set(res, { firstProperty: 'test!' });
-    io.sendResponse()(req, res, null);
+    io.sendResponse()(req, res, () => null);
     expect(res.json).toHaveBeenCalled();
   });
 

@@ -273,7 +273,7 @@ export class IO {
         }
         this.validateResponse(data);
         res.json(data);
-        return null;
+        return next();
       } catch (error) {
         return next(error);
       }
