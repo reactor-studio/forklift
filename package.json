@@ -10,7 +10,7 @@
   },
   "scripts": {
     "test": "jest",
-    "build": "tsc --declaration"
+    "build": "rm -rf lib/ && tsc --declaration"
   },
   "repository": {
     "type": "git",
