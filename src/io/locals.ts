@@ -12,7 +12,7 @@ export function getLocals(
   obj: object,
   namespace: string,
   defaultValue: object = undefined,
-): object {
+): any {
   return _.get(obj, `locals.${namespace}`, defaultValue);
 }
 
@@ -26,8 +26,8 @@ export function getLocals(
 export function setLocals(
   obj: object,
   namespace: string,
-  data: object,
-): object {
+  data: any,
+): any {
   if (!_.has(obj, 'locals')) {
     _.set(obj, 'locals', {});
   }
