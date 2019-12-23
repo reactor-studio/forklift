@@ -75,7 +75,7 @@ is the most general one which sets the object at *locals.io.data.${path}* to the
 Such approach is expected when setting the response data so Forklift can know what data to validate and serialize. 
 
 ```javascript
-// exampleController
+// exampleController.js
 import { IO, Status } from "@reactor4/forklift";
 
 post(req, res, next) {
