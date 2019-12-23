@@ -23,11 +23,7 @@ export function getLocals(
  * `namespace` groups all data belonging to one middleware - for example,
  *  authentication middleware might save user id to `req.locals.auth.userId`.
  */
-export function setLocals(
-  obj: object,
-  namespace: string,
-  data: any,
-): any {
+export function setLocals(obj: object, namespace: string, data: any): any {
   if (!_.has(obj, 'locals')) {
     _.set(obj, 'locals', {});
   }
