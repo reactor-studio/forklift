@@ -15,7 +15,7 @@ export const asyncMiddleware = (
   fn: (req: Request, res: Response, next?: NextFunction) => Promise<void>,
 ) => async (req: Request, res: Response, next: NextFunction): Promise<void> => {
   try {
-    await fn(req, res);
+    await fn(req, res, next);
   } catch (err) {
     next(err);
     return;
