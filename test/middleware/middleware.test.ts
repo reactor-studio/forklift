@@ -83,4 +83,29 @@ describe('Forklift error middleware', () => {
 
     expect(response.body).toMatchSnapshot();
   });
+
+  it('should call next method if no exception occurred', async () => {
+    const nextToCall = jest.fn((_req: any, _res: any, next: any): void => {
+      next();
+    });
+
+    const testController = {
+      get: (): ((
+        req: express.Request,
+        res: express.Response,
+        next: express.NextFunction,
+      ) => Promise<void>) =>
+        asyncMiddleware(async (_req, _res, next) => {
+          expect(next).toBeDefined();
+          next();
+        }),
+    };
+    const app = express();
+    app.get('/get', testController.get(), nextToCall);
+    app.use(errorMiddleware(false));
+
+    await request(app).get('/get');
+
+    expect(nextToCall).toHaveBeenCalled();
+  });
 });
