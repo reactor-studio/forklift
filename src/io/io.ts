@@ -188,8 +188,11 @@ export class IO {
   }
 
   private validateRequestHeaders(req: Request): void {
-    if (req.headers['content-type'].indexOf('application/json') < 0) {
-      const message = 'Please use application-json as Content-Type';
+    if (
+      _.isEmpty(req.headers) ||
+      req.headers['content-type'].indexOf('application/json') < 0
+    ) {
+      const message = 'Please use application-json as Content-Type header';
       throw new InputError(message);
     }
 

@@ -204,7 +204,18 @@ describe('io function', () => {
     expect(() =>
       io.processRequest()(req, res, next),
     ).toThrowErrorMatchingInlineSnapshot(
-      `"Please use application-json as Content-Type"`,
+      `"Please use application-json as Content-Type header"`,
+    );
+  });
+
+  test('processRequest throws correct error on missing content-type', () => {
+    const next = (err: Error): void => {
+      throw err;
+    };
+    expect(() =>
+      io.processRequest()(req, res, next),
+    ).toThrowErrorMatchingInlineSnapshot(
+      `"Please use application-json as Content-Type header"`,
     );
   });
 
