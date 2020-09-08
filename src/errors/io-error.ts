@@ -17,7 +17,7 @@ export default abstract class IoError extends ForkliftError {
 
   readonly title: string;
 
-  readonly details: object;
+  readonly details: ErrorDetails;
 
   constructor(
     message: string,
@@ -34,7 +34,7 @@ export default abstract class IoError extends ForkliftError {
     this.details = details;
   }
 
-  toJson = (showTrace = false): object => {
+  toJson = (showTrace = false) => {
     return {
       status: this.status,
       title: this.name,

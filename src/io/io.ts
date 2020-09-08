@@ -8,6 +8,10 @@ import { Status, statusOptions } from './status';
 const jsonContentType = 'application/json';
 const supportedContentTypes = [jsonContentType, '*/*', '*'];
 
+type OptionsType = {
+  contentTypes: string[];
+};
+
 export class IO {
   /**
    * Wrapper for lodash's `set` function. Sets the data and/or status in the
@@ -20,11 +24,11 @@ export class IO {
    * @param path path to set data to
    */
   static set(
-    target: object,
+    target: Record<string, unknown>,
     data: any,
     status: Status = Status.OK,
     path: string = null,
-  ): object {
+  ): Record<string, unknown> {
     if (path) {
       _.set(target, `locals.io.data.${path}`, data);
     } else {
@@ -39,7 +43,7 @@ export class IO {
    * @param target target object
    * @param localsKey custom locals path
    */
-  static get(target: object, localsKey = ''): any {
+  static get(target: Record<string, unknown>, localsKey = ''): any {
     const data = _.get(target, 'locals.io.data');
     if (localsKey) {
       return _.get(data, localsKey);
@@ -53,7 +57,7 @@ export class IO {
    * equivalent setter function.
    * @param target target object
    */
-  static getStatus(target: object): any {
+  static getStatus(target: Record<string, unknown>): any {
     return _.get(target, 'locals.io.status');
   }
 
@@ -64,7 +68,10 @@ export class IO {
    * @param target The express request or response.
    * @param data The IO data to set.
    */
-  static setCreated(target: object, data: any): object {
+  static setCreated(
+    target: Record<string, unknown>,
+    data: any,
+  ): Record<string, unknown> {
     return IO.set(target, data, Status.CREATED);
   }
 
@@ -75,7 +82,7 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setEmpty(target: object): object {
+  static setEmpty(target: Record<string, unknown>): Record<string, unknown> {
     return IO.set(target, null, Status.NO_CONTENT);
   }
 
@@ -86,7 +93,9 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setBadRequest(target: object): object {
+  static setBadRequest(
+    target: Record<string, unknown>,
+  ): Record<string, unknown> {
     return IO.set(target, null, Status.BAD_REQUEST);
   }
 
@@ -97,7 +106,9 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setUnauthorized(target: object): object {
+  static setUnauthorized(
+    target: Record<string, unknown>,
+  ): Record<string, unknown> {
     return IO.set(target, null, Status.UNAUTHORIZED);
   }
 
@@ -108,7 +119,9 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setForbidden(target: object): object {
+  static setForbidden(
+    target: Record<string, unknown>,
+  ): Record<string, unknown> {
     return IO.set(target, null, Status.FORBIDDEN);
   }
 
@@ -119,7 +132,7 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setNotFound(target: object): object {
+  static setNotFound(target: Record<string, unknown>): Record<string, unknown> {
     return IO.set(target, null, Status.NOT_FOUND);
   }
 
@@ -129,7 +142,7 @@ export class IO {
    * @param res response object
    */
   static prepareResponse(res: Response): boolean {
-    const ioStatus = IO.getStatus(res) || Status.NO_CONTENT;
+    const ioStatus = IO.getStatus(res as any) || Status.NO_CONTENT;
     const status = statusOptions[ioStatus];
     res.status(status.code);
 
@@ -158,7 +171,7 @@ export class IO {
       const message = _.get(errorObject, 'error.subErrors')
         ? `It can be any of these errors [${_.map(
             errorObject.error.subErrors,
-            subError => subError.message,
+            (subError) => subError.message,
           )}]`
         : errorObject.error.message;
       const errorDetails = {
@@ -175,11 +188,11 @@ export class IO {
 
   private resSchema: tv4.JsonSchema;
 
-  private options: object;
+  private options: OptionsType;
 
   constructor(
     reqSchema?: tv4.JsonSchema,
-    options?: object,
+    options?: OptionsType,
     resSchema?: tv4.JsonSchema,
   ) {
     this.reqSchema = reqSchema;
@@ -203,9 +216,9 @@ export class IO {
     // https://www.w3.org/Protocols/rfc2616/rfc2616-sec3.html#sec3.9
     acceptHeader
       .split(',')
-      .forEach(type => contentTypes.push(type.split(';')[0]));
+      .forEach((type) => contentTypes.push(type.split(';')[0]));
 
-    customContentTypes.forEach(type => contentTypes.push(type));
+    customContentTypes.forEach((type) => contentTypes.push(type));
 
     const acceptedContentTypes = _.intersection(
       contentTypes,
@@ -213,10 +226,10 @@ export class IO {
     );
 
     if (_.isEmpty(acceptedContentTypes)) {
-      const message = `${'Client does not accept JSON responses. ' +
-        'Did you set the correct "Accept" header?'}${JSON.stringify(
-        contentTypes,
-      )}`;
+      const message = `${
+        'Client does not accept JSON responses. ' +
+        'Did you set the correct "Accept" header?'
+      }${JSON.stringify(contentTypes)}`;
       throw new InputError(message);
     }
   }
@@ -231,7 +244,7 @@ export class IO {
     }
   }
 
-  private validateResponse(data: object): void {
+  private validateResponse(data: Response): void {
     if (this.resSchema) {
       const errorDetails = IO.validateResource(data, this.resSchema);
       if (errorDetails) {
@@ -251,7 +264,7 @@ export class IO {
   processRequest() {
     return (req: Request, _res: Response, next: NextFunction): void => {
       this.validateRequest(req);
-      IO.set(req, req.body);
+      IO.set(req as any, req.body);
       next();
     };
   }
@@ -270,7 +283,7 @@ export class IO {
           res.end();
           return null;
         }
-        const data = IO.get(res);
+        const data = IO.get(res as any);
         if (_.isEmpty(data)) {
           return next(new OutputError('No data to serialize'));
         }
