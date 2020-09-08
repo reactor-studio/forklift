@@ -88,11 +88,11 @@ describe('io static function', () => {
 });
 
 describe('io function', () => {
-  let io;
-  let req;
-  let res;
+  let io: IO;
+  let req: Request;
+  let res: Response;
 
-  const reqSchema = {
+  const reqBodySchema = {
     type: 'object',
     properties: {
       firstProperty: {
@@ -112,7 +112,18 @@ describe('io function', () => {
     required: ['firstProperty', 'objectProperty'],
   };
 
-  const resSchema = {
+  const reqQuerySchema = {
+    type: 'object',
+    properties: {
+      queryProperty: {
+        type: 'string',
+        description: "The response's first property.",
+      },
+    },
+    required: ['queryProperty'],
+  };
+
+  const resBodySchema = {
     type: 'object',
     properties: {
       firstProperty: {
@@ -126,7 +137,7 @@ describe('io function', () => {
   beforeEach(() => {
     req = new Request();
     res = new Response();
-    io = new IO(reqSchema, { options: 1 } as any, resSchema);
+    io = new IO({ reqBodySchema, resBodySchema });
   });
 
   afterEach(() => {
@@ -136,26 +147,22 @@ describe('io function', () => {
 
   test('prepareResponse sets correct status code', () => {
     _.set(res, 'locals.io.status', 'ok');
-    IO.prepareResponse(res);
+    IO.prepareResponse(res as any);
     expect(res.status).toHaveBeenCalledWith(200);
   });
 
   test('setResponseHeaders sets application/json to content-type', () => {
-    IO.setResponseHeaders(res);
+    IO.setResponseHeaders(res as any);
     expect(res.getHeader('Content-Type')).toEqual('application/json');
   });
 
   test('constructor sets correct request schema', () => {
-    expect(io.reqSchema).toEqual(reqSchema);
-  });
-
-  test('constructor sets correct options', () => {
-    expect(io.options).toEqual({ options: 1 });
+    expect((io as any).reqBodySchema).toEqual(reqBodySchema);
   });
 
   test('validateResource returns error details on request not respecting schema', () => {
     req.setBody({ firstProperty: 'abc', objectProperty: {} });
-    expect(IO.validateResource(req.body, reqSchema)).toMatchSnapshot();
+    expect(IO.validateResource(req.body, reqBodySchema)).toMatchSnapshot();
   });
 
   test('validateResource returns null on request respecting schema', () => {
@@ -163,13 +170,13 @@ describe('io function', () => {
       firstProperty: 'abc',
       objectProperty: { nestedProperty: 'bcd' },
     });
-    expect(IO.validateResource(req.body, reqSchema)).toBeNull();
+    expect(IO.validateResource(req.body, reqBodySchema)).toBeNull();
   });
 
   test('validateRequestHeaders throws on empty accept header', () => {
     req.headers['content-type'] = 'application/json';
     expect(() =>
-      io.validateRequestHeaders(req),
+      (io as any).validateRequestHeaders(req),
     ).toThrowErrorMatchingInlineSnapshot(
       `"Client does not accept JSON responses. Did you set the correct \\"Accept\\" header?[\\"\\"]"`,
     );
@@ -181,18 +188,20 @@ describe('io function', () => {
     req.setHeaders('Accept', 'application/json');
     req.setHeaders('content-type', 'application/json');
 
-    expect(() => ioTest.processRequest()(req, res, (err) => err)).not.toThrow();
+    expect(() =>
+      ioTest.processRequest()(req as any, res as any, (err) => err),
+    ).not.toThrow();
   });
 
   test('validateRequest throws on invalid body', () => {
-    const next = (err: Error): void => {
+    const next = (err: Error) => {
       throw err;
     };
     req.setHeaders('Accept', 'application/json');
     req.setHeaders('content-type', 'application/json');
     req.setBody({ firstProperty: 'abc', objectProperty: {} });
     expect(() =>
-      io.processRequest()(req, res, next),
+      io.processRequest()(req as any, res as any, next as any),
     ).toThrowErrorMatchingSnapshot();
   });
 
@@ -202,7 +211,7 @@ describe('io function', () => {
     };
     req.setHeaders('content-type', 'text/plain');
     expect(() =>
-      io.processRequest()(req, res, next),
+      io.processRequest()(req as any, res as any, next as any),
     ).toThrowErrorMatchingInlineSnapshot(
       `"Please use application-json as Content-Type header"`,
     );
@@ -213,15 +222,15 @@ describe('io function', () => {
       throw err;
     };
     expect(() =>
-      io.processRequest()(req, res, next),
+      io.processRequest()(req as any, res as any, next as any),
     ).toThrowErrorMatchingInlineSnapshot(
       `"Please use application-json as Content-Type header"`,
     );
   });
 
   test('sendResponse ends response on non-serializable data', () => {
-    IO.set(res, {}, Status.NOT_FOUND);
-    io.sendResponse()(req, res, null);
+    IO.set(res as any, {}, Status.NOT_FOUND);
+    io.sendResponse()(req as any, res as any, null);
     expect(res.end).toHaveBeenCalled();
   });
 
@@ -229,24 +238,48 @@ describe('io function', () => {
     const next = (err: Error): void => {
       throw err;
     };
-    IO.set(res, null, Status.OK);
+    IO.set(res as any, null, Status.OK);
     expect(() =>
-      io.sendResponse()(req, res, next),
+      io.sendResponse()(req as any, res as any, next as any),
     ).toThrowErrorMatchingInlineSnapshot(`"No data to serialize"`);
   });
 
   test('sendResponse sends json response', () => {
     IO.set(res, { firstProperty: 'test!' });
-    io.sendResponse()(req, res, () => null);
+    io.sendResponse()(req as any, res as any, () => null);
     expect(res.json).toHaveBeenCalled();
   });
 
   test('sendResponse forwards the io error', () => {
+    const next = (err: Error) => err;
+
     IO.set(res, { BADProperty: 'test!' });
     expect(
-      io
-        .sendResponse()(req, res, (err: Error) => err)
-        .toJson(),
+      (io.sendResponse()(req as any, res as any, next as any) as any).toJson(),
     ).toMatchSnapshot();
+  });
+
+  test('processRequest throws when query is not matching schema', () => {
+    const next = (err: Error): void => {
+      throw err;
+    };
+    const testIo = new IO({ reqQuerySchema });
+    req.setHeaders('Accept', 'application/json');
+    req.setHeaders('content-type', 'application/json');
+
+    expect(() =>
+      testIo.processRequest()(req as any, res as any, next as any),
+    ).toThrowErrorMatchingSnapshot();
+  });
+
+  test('processRequest does not throw when query is matching schema', () => {
+    const testIo = new IO({ reqQuerySchema });
+    req.setHeaders('Accept', 'application/json');
+    req.setHeaders('content-type', 'application/json');
+    req.setQuery('queryProperty', 'yes');
+
+    expect(() =>
+      testIo.processRequest()(req as any, res as any, (err) => err),
+    ).not.toThrow();
   });
 });

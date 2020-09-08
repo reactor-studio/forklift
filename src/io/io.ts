@@ -8,8 +8,15 @@ import { Status, statusOptions } from './status';
 const jsonContentType = 'application/json';
 const supportedContentTypes = [jsonContentType, '*/*', '*'];
 
-type OptionsType = {
+type Options = {
   contentTypes: string[];
+};
+
+type Configuration = {
+  reqBodySchema?: tv4.JsonSchema;
+  reqQuerySchema?: tv4.JsonSchema;
+  resBodySchema?: tv4.JsonSchema;
+  options?: Options;
 };
 
 export class IO {
@@ -24,11 +31,11 @@ export class IO {
    * @param path path to set data to
    */
   static set(
-    target: Record<string, unknown>,
+    target: any,
     data: any,
     status: Status = Status.OK,
     path: string = null,
-  ): Record<string, unknown> {
+  ): any {
     if (path) {
       _.set(target, `locals.io.data.${path}`, data);
     } else {
@@ -43,7 +50,7 @@ export class IO {
    * @param target target object
    * @param localsKey custom locals path
    */
-  static get(target: Record<string, unknown>, localsKey = ''): any {
+  static get(target: any, localsKey = ''): any {
     const data = _.get(target, 'locals.io.data');
     if (localsKey) {
       return _.get(data, localsKey);
@@ -57,7 +64,7 @@ export class IO {
    * equivalent setter function.
    * @param target target object
    */
-  static getStatus(target: Record<string, unknown>): any {
+  static getStatus(target: any): any {
     return _.get(target, 'locals.io.status');
   }
 
@@ -68,10 +75,7 @@ export class IO {
    * @param target The express request or response.
    * @param data The IO data to set.
    */
-  static setCreated(
-    target: Record<string, unknown>,
-    data: any,
-  ): Record<string, unknown> {
+  static setCreated(target: any, data: any): any {
     return IO.set(target, data, Status.CREATED);
   }
 
@@ -82,7 +86,7 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setEmpty(target: Record<string, unknown>): Record<string, unknown> {
+  static setEmpty(target: any): any {
     return IO.set(target, null, Status.NO_CONTENT);
   }
 
@@ -93,9 +97,7 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setBadRequest(
-    target: Record<string, unknown>,
-  ): Record<string, unknown> {
+  static setBadRequest(target: any): any {
     return IO.set(target, null, Status.BAD_REQUEST);
   }
 
@@ -106,9 +108,7 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setUnauthorized(
-    target: Record<string, unknown>,
-  ): Record<string, unknown> {
+  static setUnauthorized(target: any): any {
     return IO.set(target, null, Status.UNAUTHORIZED);
   }
 
@@ -119,9 +119,7 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setForbidden(
-    target: Record<string, unknown>,
-  ): Record<string, unknown> {
+  static setForbidden(target: any): any {
     return IO.set(target, null, Status.FORBIDDEN);
   }
 
@@ -132,7 +130,7 @@ export class IO {
    *
    * @param target The express request or response.
    */
-  static setNotFound(target: Record<string, unknown>): Record<string, unknown> {
+  static setNotFound(target: any): any {
     return IO.set(target, null, Status.NOT_FOUND);
   }
 
@@ -184,20 +182,19 @@ export class IO {
     return null;
   }
 
-  private reqSchema: tv4.JsonSchema;
+  private reqBodySchema: tv4.JsonSchema;
 
-  private resSchema: tv4.JsonSchema;
+  private reqQuerySchema: tv4.JsonSchema;
 
-  private options: OptionsType;
+  private resBodySchema: tv4.JsonSchema;
 
-  constructor(
-    reqSchema?: tv4.JsonSchema,
-    options?: OptionsType,
-    resSchema?: tv4.JsonSchema,
-  ) {
-    this.reqSchema = reqSchema;
-    this.resSchema = resSchema;
-    this.options = options;
+  private options: Options;
+
+  constructor(configuration?: Configuration) {
+    this.reqBodySchema = configuration?.reqBodySchema;
+    this.reqQuerySchema = configuration?.reqQuerySchema;
+    this.resBodySchema = configuration?.resBodySchema;
+    this.options = configuration?.options;
   }
 
   private validateRequestHeaders(req: Request): void {
@@ -236,8 +233,14 @@ export class IO {
 
   private validateRequest(req: Request): void {
     this.validateRequestHeaders(req);
-    if (this.reqSchema) {
-      const errorDetails = IO.validateResource(req.body, this.reqSchema);
+    if (this.reqBodySchema) {
+      const errorDetails = IO.validateResource(req.body, this.reqBodySchema);
+      if (errorDetails) {
+        throw new InputError(errorDetails.why, errorDetails);
+      }
+    }
+    if (this.reqQuerySchema) {
+      const errorDetails = IO.validateResource(req.query, this.reqQuerySchema);
       if (errorDetails) {
         throw new InputError(errorDetails.why, errorDetails);
       }
@@ -245,8 +248,8 @@ export class IO {
   }
 
   private validateResponse(data: Response): void {
-    if (this.resSchema) {
-      const errorDetails = IO.validateResource(data, this.resSchema);
+    if (this.resBodySchema) {
+      const errorDetails = IO.validateResource(data, this.resBodySchema);
       if (errorDetails) {
         throw new OutputError(errorDetails.why, errorDetails);
       }
