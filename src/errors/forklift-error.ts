@@ -22,7 +22,7 @@ export default class ForkliftError extends Error {
     Error.captureStackTrace(this, this.constructor);
   }
 
-  toJson = (showTrace = false): object => {
+  toJson = (showTrace = false) => {
     return {
       status: this.status,
       title: this.name,

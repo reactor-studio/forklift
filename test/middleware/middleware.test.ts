@@ -59,9 +59,7 @@ describe('Forklift error middleware', () => {
 
   it('should handle unhandled exceptions in handlers with asyncMiddleware', async () => {
     function sleep(ms: number): Promise<void> {
-      return new Promise((resolve: Function): number =>
-        setTimeout(resolve, ms),
-      );
+      return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
     const testController = {

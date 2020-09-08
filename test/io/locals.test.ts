@@ -2,7 +2,7 @@ import _ from 'lodash';
 import { getLocals, setLocals } from '../../src';
 
 describe('locals function', () => {
-  let target: object;
+  let target: Record<string, unknown>;
 
   beforeEach(() => {
     target = {};

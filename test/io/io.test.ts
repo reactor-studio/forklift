@@ -126,7 +126,7 @@ describe('io function', () => {
   beforeEach(() => {
     req = new Request();
     res = new Response();
-    io = new IO(reqSchema, { options: 1 }, resSchema);
+    io = new IO(reqSchema, { options: 1 } as any, resSchema);
   });
 
   afterEach(() => {
@@ -181,7 +181,7 @@ describe('io function', () => {
     req.setHeaders('Accept', 'application/json');
     req.setHeaders('content-type', 'application/json');
 
-    expect(() => ioTest.processRequest()(req, res, err => err)).not.toThrow();
+    expect(() => ioTest.processRequest()(req, res, (err) => err)).not.toThrow();
   });
 
   test('validateRequest throws on invalid body', () => {
