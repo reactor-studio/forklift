@@ -37,7 +37,7 @@ const exampleSchema = {
   required: ["exampleId", "exampleName"],
 };
 
-const exampleIo = new IO(exampleSchema);
+const exampleIo = new IO({ reqBodySchema: exampleSchema });
 ```
 
 Now, `ioInstance` can be included as a middleware just like any other.
@@ -101,13 +101,16 @@ router.post(
 );
 ```
 
-The final middleware function `sendResponse` will validate the response data (located at `res` object's *locals.io.data* namespace) if response JSON schema was provided as third parameter in `IO` class constructor. The second parameter is specified as `options` object which for now includes possibility to include other valid **Content-Type** headers.
+It is also possible to validate query parameters if `reqQuerySchema` is provided in `IO`s config constructor. The `options` parameter object for now includes possibility to include other valid **Content-Type** headers. The final middleware function `sendResponse` will validate the response data (located at `res` object's *locals.io.data* namespace) if response JSON schema was provided as `resBodySchema` parameter in `IO` class constructor. 
 
 ```javascript
 const exampleIo = new IO(
-  reqSchema, 
-  { contentTypes: ["text/html"] }, 
-  resSchema 
+  {
+    reqBodySchema,
+    reqQuerySchema, 
+    options: { contentTypes: ["text/html"] }, 
+    resBodySchema 
+  }
 );
 ```
 
