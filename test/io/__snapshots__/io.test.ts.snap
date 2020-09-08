@@ -1,5 +1,7 @@
 // Jest Snapshot v1, https://goo.gl/fbAQLP
 
+exports[`io function processRequest throws when query is not matching schema 1`] = `"Resource does not respect the schema"`;
+
 exports[`io function sendResponse forwards the io error 1`] = `
 Object {
   "details": Object {

@@ -9,7 +9,7 @@ import _ from 'lodash';
  * Read data stored inside particular `namespace` of `obj.locals`.
  */
 export function getLocals(
-  obj: Record<string, unknown>,
+  obj: any,
   namespace: string,
   defaultValue: any = undefined,
 ): any {
@@ -23,11 +23,7 @@ export function getLocals(
  * `namespace` groups all data belonging to one middleware - for example,
  *  authentication middleware might save user id to `req.locals.auth.userId`.
  */
-export function setLocals(
-  obj: Record<string, unknown>,
-  namespace: string,
-  data: any,
-): any {
+export function setLocals(obj: any, namespace: string, data: any): any {
   if (!_.has(obj, 'locals')) {
     _.set(obj, 'locals', {});
   }
