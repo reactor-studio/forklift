@@ -1,6 +1,6 @@
 {
   "name": "@reactor4/forklift",
-  "version": "1.0.3",
+  "version": "2.0.0",
   "description": "Express.js middleware for handling request and response validation, serialization and more",
   "main": "lib/index.js",
   "directories": {
