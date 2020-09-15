@@ -19,6 +19,10 @@ type Configuration = {
   options?: Options;
 };
 
+type SendResponseOptions = {
+  skipNextOnSuccess?: boolean;
+};
+
 export class IO {
   /**
    * Wrapper for lodash's `set` function. Sets the data and/or status in the
@@ -278,7 +282,7 @@ export class IO {
    * It sets status provided by the `IO`'s `set` function or its' derivative.
    * @returns middleware handler
    */
-  sendResponse() {
+  sendResponse(options?: SendResponseOptions) {
     return (_req: Request, res: Response, next: NextFunction): void => {
       try {
         const shouldSerializeData = IO.prepareResponse(res);
@@ -292,6 +296,9 @@ export class IO {
         }
         this.validateResponse(data);
         res.json(data);
+        if (options?.skipNextOnSuccess) {
+          return null;
+        }
         return next();
       } catch (error) {
         return next(error);
