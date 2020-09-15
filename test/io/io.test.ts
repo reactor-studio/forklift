@@ -259,6 +259,19 @@ describe('io function', () => {
     ).toMatchSnapshot();
   });
 
+  test('sendResponse doesnt call next if skipNextOnSuccess is provided', () => {
+    const next = jest.fn();
+
+    IO.set(res, { firstProperty: 'test!' });
+    io.sendResponse({ skipNextOnSuccess: true })(
+      req as any,
+      res as any,
+      next as any,
+    ) as any;
+
+    expect(next).not.toHaveBeenCalled();
+  });
+
   test('processRequest throws when query is not matching schema', () => {
     const next = (err: Error): void => {
       throw err;
