@@ -146,9 +146,27 @@ describe('io function', () => {
   });
 
   test('prepareResponse sets correct status code', () => {
-    _.set(res, 'locals.io.status', 'ok');
+    _.set(res, 'locals.io.status', Status.NOT_FOUND);
     IO.prepareResponse(res as any);
-    expect(res.status).toHaveBeenCalledWith(200);
+    expect(res.status).toHaveBeenCalledWith(404);
+  });
+
+  test('prepareResponse throws on wrong status', () => {
+    _.set(res, 'locals.io.status', {});
+    expect(() => IO.prepareResponse(res as any)).toThrow();
+  });
+
+  test('prepareResponse supports custom status', () => {
+    _.set(res, 'locals.io.status', { code: 409 });
+    IO.prepareResponse(res as any);
+    expect(res.status).toHaveBeenCalledWith(409);
+  });
+
+  test('prepareResponse supports custom status & serialization options', () => {
+    _.set(res, 'locals.io.status', { code: 409, shouldSerializeData: true });
+    const response = IO.prepareResponse(res as any);
+    expect(res.status).toHaveBeenCalledWith(409);
+    expect(response).toEqual(true);
   });
 
   test('setResponseHeaders sets application/json to content-type', () => {

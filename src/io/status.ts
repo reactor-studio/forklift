@@ -8,7 +8,12 @@ export enum Status {
   NOT_FOUND = 'not-found',
 }
 
-export const statusOptions = {
+export type StatusOptions = {
+  code: number;
+  shouldSerializeData: boolean;
+};
+
+export const statusOptions: { [key: string]: StatusOptions } = {
   [Status.OK]: {
     code: 200,
     shouldSerializeData: true,
