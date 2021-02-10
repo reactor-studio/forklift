@@ -153,7 +153,7 @@ export class IO {
 
     res.status(status.code);
 
-    return status.shouldSerializeData;
+    return status.json;
   }
 
   /**
@@ -290,8 +290,8 @@ export class IO {
   sendResponse(options?: SendResponseOptions) {
     return (_req: Request, res: Response, next: NextFunction): void => {
       try {
-        const shouldSerializeData = IO.prepareResponse(res);
-        if (!shouldSerializeData) {
+        const json = IO.prepareResponse(res);
+        if (!json) {
           res.end();
           return null;
         }
