@@ -163,7 +163,7 @@ describe('io function', () => {
   });
 
   test('prepareResponse supports custom status & serialization options', () => {
-    _.set(res, 'locals.io.status', { code: 409, shouldSerializeData: true });
+    _.set(res, 'locals.io.status', { code: 409, json: true });
     const response = IO.prepareResponse(res as any);
     expect(res.status).toHaveBeenCalledWith(409);
     expect(response).toEqual(true);

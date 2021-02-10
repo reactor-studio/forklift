@@ -10,36 +10,36 @@ export enum Status {
 
 export type StatusOptions = {
   code: number;
-  shouldSerializeData: boolean;
+  json: boolean;
 };
 
 export const statusOptions: { [key: string]: StatusOptions } = {
   [Status.OK]: {
     code: 200,
-    shouldSerializeData: true,
+    json: true,
   },
   [Status.CREATED]: {
     code: 201,
-    shouldSerializeData: true,
+    json: true,
   },
   [Status.NO_CONTENT]: {
     code: 204,
-    shouldSerializeData: false,
+    json: false,
   },
   [Status.BAD_REQUEST]: {
     code: 400,
-    shouldSerializeData: false,
+    json: false,
   },
   [Status.UNAUTHORIZED]: {
     code: 401,
-    shouldSerializeData: false,
+    json: false,
   },
   [Status.FORBIDDEN]: {
     code: 403,
-    shouldSerializeData: false,
+    json: false,
   },
   [Status.NOT_FOUND]: {
     code: 404,
-    shouldSerializeData: false,
+    json: false,
   },
 };
