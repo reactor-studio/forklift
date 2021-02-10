@@ -3,7 +3,7 @@ import tv4 from 'tv4';
 import { Request, Response, NextFunction } from 'express';
 import { InputError, OutputError } from '../errors';
 import { ErrorDetails } from '../errors/io-error';
-import { Status, statusOptions } from './status';
+import { Status, StatusOptions, statusOptions } from './status';
 
 const jsonContentType = 'application/json';
 const supportedContentTypes = [jsonContentType, '*/*', '*'];
@@ -37,7 +37,7 @@ export class IO {
   static set(
     target: any,
     data: any,
-    status: Status = Status.OK,
+    status: Status | StatusOptions = Status.OK,
     path: string = null,
   ): any {
     if (path) {
@@ -145,7 +145,12 @@ export class IO {
    */
   static prepareResponse(res: Response): boolean {
     const ioStatus = IO.getStatus(res as any) || Status.NO_CONTENT;
-    const status = statusOptions[ioStatus];
+    const status = statusOptions[ioStatus] || ioStatus;
+
+    if (!status || !status.code) {
+      throw new Error('Status code missing');
+    }
+
     res.status(status.code);
 
     return status.shouldSerializeData;
