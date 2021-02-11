@@ -1,5 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import errorToJson from 'error-to-json';
+import _ from 'lodash';
+
 import ForkliftError from '../errors/forklift-error';
 
 /**
@@ -21,18 +23,26 @@ export const errorMiddleware = (showTrace = true) => (
   }
 
   try {
+    let errorResponse;
     if (err instanceof ForkliftError) {
       res.status(err.status);
-      res.json(err.toJson(showTrace));
+      errorResponse = err.toJson(showTrace);
+    } else if (_.isFunction((err as any).toJSON)) {
+      res.status(500);
+      errorResponse = (err as any).toJSON();
+      if (!showTrace) {
+        const { name, message, description } = errorResponse;
+        errorResponse = { name, message, description };
+      }
     } else {
       res.status(500);
-      let errorResponse = errorToJson(err);
+      errorResponse = errorToJson(err);
       if (!showTrace) {
         const { name, statusCode, error } = errorResponse;
         errorResponse = { name, statusCode, error };
       }
-      res.json(errorResponse);
     }
+    res.json(errorResponse);
   } catch (e) {
     res.status(500);
     let trace = errorToJson(e);

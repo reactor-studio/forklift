@@ -57,6 +57,33 @@ describe('Forklift error middleware', () => {
     expect(response.body.name).toBe('Error');
   });
 
+  it('should use toJSON if available', async () => {
+    class CustomError extends Error {
+      constructor(msg: string) {
+        super(msg);
+        Object.setPrototypeOf(this, new.target.prototype);
+      }
+
+      toJSON() {
+        return { message: 'Yiha' };
+      }
+    }
+
+    const testController = {
+      get: () => (): Promise<void> => {
+        throw new CustomError('Hey! Not found!');
+      },
+    };
+
+    const app = express();
+    app.get('/get', testController.get());
+    app.use(errorMiddleware());
+
+    const response = await request(app).get('/get');
+
+    expect(response.body.message).toBe('Yiha');
+  });
+
   it('should handle unhandled exceptions in handlers with asyncMiddleware', async () => {
     function sleep(ms: number): Promise<void> {
       return new Promise((resolve) => setTimeout(resolve, ms));
